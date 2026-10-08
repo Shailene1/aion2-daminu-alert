@@ -1,0 +1,16 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip install curl_cffi
+      - shell: python
+        run: |
+          from curl_cffi import requests as r
+          for url in ["https://aion2.gaming.tools/server-status?region=EU","https://aion2.gaming.tools/server-status/__data.json?region=EU"]:
+            for imp in ["chrome124","chrome131","chrome136","safari18_0","firefox135"]:
+              try:
+                x=r.get(url,impersonate=imp,timeout=30)
+                print(url[-30:],imp,x.status_code,x.headers.get("server"),x.headers.get("cf-mitigated"),len(x.text),x.text[:120].replace("\n"," "))
+              except Exception as e: print(imp,e)
