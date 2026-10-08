@@ -22,7 +22,11 @@ BLOCKED_MARK = "Character creation blocked"
 
 def creation_blocked():
     """True se bloccato, False se aperto. Solleva se la riga del server manca."""
-    resp = cffi_requests.get(URL, impersonate="chrome124", timeout=30)
+    # Da GitHub Cloudflare ferma chrome124 con un 403: si passa al profilo successivo.
+    for profile in ("chrome124", "chrome136", "safari18_0", "firefox135"):
+        resp = cffi_requests.get(URL, impersonate=profile, timeout=30)
+        if resp.status_code != 403:
+            break
     resp.raise_for_status()
     html = resp.text
     start = html.find(f">{SERVER}</span>")
