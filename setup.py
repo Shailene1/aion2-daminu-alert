@@ -20,11 +20,18 @@ def telegram(token, method, **params):
 
 
 def main():
-    # input e non getpass: nel campo nascosto di Windows il Ctrl+V non incolla il testo.
-    token = input("Incolla il token del bot e premi Invio: ").strip().strip("'\"`<>")
-    if not re.fullmatch(r"\d{6,}:[A-Za-z0-9_-]{30,}", token):
+    # Il token si prende dagli appunti: in certi terminali Windows il Ctrl+V non incolla.
+    input("Copia il token del bot su Telegram, poi torna qui e premi Invio... ")
+    clip = subprocess.run(
+        ["powershell", "-NoProfile", "-Command", "Get-Clipboard -Raw"],
+        capture_output=True, text=True,
+    ).stdout
+    # Va bene anche tutto il messaggio di BotFather: il token si cerca dentro.
+    found = re.search(r"\d{6,}:[A-Za-z0-9_-]{30,}", clip)
+    token = found.group(0) if found else ""
+    if not token:
         raise SystemExit(
-            f"Questo non sembra un token ({len(token)} caratteri). Deve essere tutta la riga "
+            f"Negli appunti non c'è un token ({len(clip.strip())} caratteri). Copia la riga "
             "che BotFather scrive sotto 'Use this token to access the HTTP API', "
             "tipo 123456789:AAH... (numeri, due punti, poi circa 35 caratteri)."
         )
